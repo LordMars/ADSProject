@@ -1,49 +1,131 @@
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 
-xls = pd.ExcelFile("../csvs/Iris.xls.xlsx")
+def VisualizeCount(data):
+  print("Count: " + str(data.count()))
+
+def VisualizeMean(data):
+  print("Mean: " + str(data.mean()))
+
+def VisualizeMaxMinMeanMedianQuantileRange(data):
+  print("Minimum: " + str(data.min()))
+  print("Maximum: " + str(data.max()))
+  print("Median: " + str(data.median()))
+  print("Quartile: " + str(data.quantile(0.25)))
+  print("Range: " + str(data.max() - data.min()))
+
+  # Whisker/BoxPlot for Minimum, Max, etc.
+  plt.figure()
+  plt.boxplot(data)
+  plt.show()
 
 
-# Parse sheet 1
-Sheet = xls.parse(0) 
+def VisualizeMode(data):
+  print("Mode: " + str(data.mode()[0]))
 
-column1 = Sheet['sepal length']
-column2 = Sheet['sepal width']
-column3 = Sheet['petal length']
-column4 = Sheet['petal width']
+  # Frequency Diagram
+  plt.hist(data)
+  plt.title("Frequency diagram")
+  plt.xlabel("Value")
+  plt.ylabel("Frequency")
+  plt.show()
 
-#The 'column1' below show be replaced with a variable
-#in a function to make it abitrary and applicable to 
-# any column. its just i dont know functions in py - d.ramalho
+def VisualizeVarAndStd(data):
+  print("Variance: " + str(data.var()))
+  print("Standard Deviation: " + str(data.std()))
 
-print("Count: " + str(column1.count()))
-print("Mean: " + str(column1.mean()))
-print("Minimum: " + str(column1.min()))
-print("Maximum: " + str(column1.max()))
-print("Median: " + str(column1.median()))
-print("Mode: " + str(column1.mode()[0]))
-print("Quartile: " + str(column1.quantile(0.25)))
-print("Range: " + str(column1.max() - column1.min()))
-print("Variance: " + str(column1.var()))
-print("Standard Deviation: " + str(column1.std()))
-print("COV: ")
-print("Skewness:  " + str(column1.skew()))
-print("Kurtosis: " + str(column1.kurtosis()))
+def VisualizeCodAndSkew(data):
+  print("COV: ")
+  print("Skewness:  " + str(data.skew()))
+  print("Kurtosis: " + str(data.kurtosis()))
 
+  x = range(1,151)
+  y = data
+
+
+  plt.scatter(x, y, 3, 'red', alpha=0.5)
+  plt.grid(True)
+  plt.show()
+
+
+def AnalyzeColumn(data):
+  VisualizeCount(data)
+  VisualizeMean(data)
+  VisualizeMaxMinMeanMedianQuantileRange(data)
+  VisualizeMode(data)
+  VisualizeVarAndStd(data)
+  VisualizeCodAndSkew(data)
+
+def AnalyzeSingleRegression(data):
+  x = data.copy()
+
+  # Tryna to generate a column with 1-50 cause
+  # I couldnt get range(1,51) or anything else to
+  # work cause I'm trash at python. - Delaney
  
-fig, sct = plt.subplots()
-ind = [x+2 for x,y in enumerate(column1)]
+  count = 0
+  for i in x:
+    x[count] = count + 1
+    count += 1 
 
-for c, col in zip(('red', 'blue', 'green', 'yellow'), (column1, column2, column3, column4)):
-    plt.scatter(ind, col,
-    color=c,
-    s= 40,
-    alpha=0.5)
+  y = data
+
+  fig, ax = plt.subplots()
+  fit = np.polyfit(x, y, deg=1)
+  ax.plot(x, fit[0]*x+fit[1], color='red')
+  ax.scatter(x, y)
+
+  plt.show()
+  
+def main():
+
+  choice = raw_input("Do you want to analyze Iris or Crime Data?(I/C):")
+
+  if(choice == 'I'):
+    print("Analyzing Iris...")
+    xls = pd.ExcelFile("Iris.xls")
+
+    # Parse sheet 1
+    Sheet = xls.parse(0)
+
+    column1 = Sheet['sepal length']
+    column2 = Sheet['sepal width']
+    column3 = Sheet['petal length']
+    column4 = Sheet['petal width']
 
 
-sct.set_xlabel("Index")
-sct.set_ylabel("Value")
-sct.legend(loc="upper right")
-sct.grid(True)
-plt.show()
+    print("\n\n_________________________________\nANALYZING SEPAL LENGTH\n_________________________________\n\n")
+    AnalyzeColumn(column1)
+    print("\n\n_________________________________\nANALYZING SEPAL WIDTH\n_________________________________\n\n")
+    AnalyzeColumn(column2)
+    print("\n\n_________________________________\nANALYZING PETAL LENGTH\n_________________________________\n\n")
+    AnalyzeColumn(column3)
+    print("\n\n_________________________________\nANALYZING PETAL LENGTH\n_________________________________\n\n")
+    AnalyzeColumn(column4)
+
+  elif(choice == 'C'):
+    print("Analyzing Crime...")
+    xls = pd.ExcelFile("crime.xls")
+
+    # Parse sheet 1
+    Sheet = xls.parse(0)
+
+    X1 = Sheet['X1']
+    X2 = Sheet['X2']
+    X3 = Sheet['X3']
+    X4 = Sheet['X4']
+    X5 = Sheet['X5']
+    X6 = Sheet['X6']
+    X7 = Sheet['X7']
+
+    AnalyzeSingleRegression(X1)
+    AnalyzeSingleRegression(X2)
+    AnalyzeSingleRegression(X3)
+    AnalyzeSingleRegression(X4)
+    AnalyzeSingleRegression(X5)
+    AnalyzeSingleRegression(X6)
+    AnalyzeSingleRegression(X7)
+   
+if __name__ == "__main__":
+  main()
